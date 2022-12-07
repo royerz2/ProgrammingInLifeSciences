@@ -1,5 +1,5 @@
-.container{
-    background: #8FEBFB;
+body{
+    background: lightblue;
 }
 .title{
     font-size:64px;
@@ -7,6 +7,7 @@
     color:orange;
     padding-left:100px;
     font-weight: bold;
+    background: coral;
 }
 .grid-container{
     display: flex;
@@ -62,11 +63,8 @@
 
 #results{
     display: flex;
+    grid-template-columns: min-content;
     justify-content: center;
 }
 
-#chart{
-    width: 1fr;
-    justify-content: center;
-}
 
