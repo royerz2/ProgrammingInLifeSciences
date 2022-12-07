@@ -3,12 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <title>MDMA</title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+
 </head>
 <body>
-    <h1>MDMA</h1>
-    <div id="main">
-        <button onclick="getAll()">Get All Into Graph</button>
-        <select id="ddDisease1">
+<div class="title">MDMA-</div>
+
+<div class="container">
+    <div class="grid-container">
+        <span class="grid">Multi&nbsp</span>
+        <span class="grid">Drug&nbsp</span>
+        <span class="grid">Mapping&nbsp</span>
+        <span class="grid">Applicator</span>
+    </div>
+
+    <div class = "text-container">
+        <span class ="text blue">select two</span>
+        <span class ="text orange">&nbspdiseases</span>
+        <span class ="text blue">&nbspand find a </span>
+        <span class ="text orange">&nbspdrug</span>
+        <span class ="text blue">&nbspthat works for both. </span>
+    </div>
+
+
+
+    <div class="main">
+
+        <select class = "Diseases" id="ddDisease1">
             <option value="Q337998">Acariasis</option>
             <option value="Q422268">Actinomycosis</option>
             <option value="Q11491562">Acute Hemorrhagic Conjunctivitis</option>
@@ -244,8 +265,7 @@
             <option value="Q18553953">Western Equine Encephalitis</option>
             <option value="Q76973">Yaws</option>
         </select>
-        <button onclick="runQuery()">Medication Query</button>
-        <select id="ddDisease2">
+        <select class = "Diseases" id="ddDisease2">
             <option value="Q337998">Acariasis</option>
             <option value="Q422268">Actinomycosis</option>
             <option value="Q11491562">Acute Hemorrhagic Conjunctivitis</option>
@@ -481,10 +501,16 @@
             <option value="Q18553953">Western Equine Encephalitis</option>
             <option value="Q76973">Yaws</option>
         </select>
+        <button onclick="runQuery()";
+                style="background-color: white;">
+            <h1 style = font-size:20px;color:steelblue >Medication Query</h1>
+        </button>
     </div>
     <div id="results">
         <svg id="chart"></svg>
     </div>
+</div>
+
 </body>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -496,6 +522,7 @@
 
 </script>
 <script>
+
     function runQuery() {
         class SPARQLQueryDispatcher {
             constructor(endpoint) {
@@ -522,13 +549,13 @@
         const endpointUrl = 'https://query.wikidata.org/sparql';
 
         //SPARQL Query for disease 1
-        const sparqlQuery1 = `SELECT DISTINCT ?drug ?drugLabel ?disease ?diseaseLabel
+        const sparqlQuery1 = `SELECT DISTINCT ?drug ?drugLabel ?articleDrug ?disease ?diseaseLabel ?articleDisease
                                 WHERE
                                 {
                                     wd:${disease1} wdt:P2176 ?drug.
 
-                                    BIND(wd:${disease1} as ?disease)
-                                  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" }
+                                   BIND(wd:${disease1} as ?disease)
+                                   SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" }
                                 }`;
 
         //Dispatch query for disease 1
@@ -536,7 +563,7 @@
         queryDispatcher1.query(sparqlQuery1).then(
             function (results1){
                 //SPARQL Query for disease 2
-                const sparqlQuery2 = `SELECT DISTINCT ?drug ?drugLabel ?disease ?diseaseLabel
+                const sparqlQuery2 = `SELECT DISTINCT ?drug ?drugLabel ?articleDrug ?disease ?diseaseLabel ?articleDisease
                                     WHERE
                                     {
                                       wd:${disease2} wdt:P2176 ?drug.
@@ -550,13 +577,13 @@
                 queryDispatcher2.query(sparqlQuery2).then(
                     function (results2){
                         //Find union of both
-                        const sparqlQuery3 = `SELECT DISTINCT ?drug ?drugLabel ?disease ?diseaseLabel
+                        const sparqlQuery3 = `SELECT DISTINCT ?drug ?drugLabel  ?disease ?diseaseLabel
                                         WHERE
                                         {
                                             wd:${disease1} wdt:P2176 ?drug.
                                             ?drug wdt:P2175 wd:${disease2}
-                                          SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" }
-                                        }`;
+                                            SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" }
+                                            }`;
                         const queryDispatcher3 = new SPARQLQueryDispatcher(endpointUrl);
                         queryDispatcher3.query(sparqlQuery3).then(
                             function (results3){
@@ -573,7 +600,7 @@
                                         var drugNode = {"id":results1.results.bindings[i].drugLabel.value, "group":3}
                                         networkData["nodes"].push(drugNode)
                                         drugSet.add(results1.results.bindings[i].drugLabel.value)
-                                    }
+                                        }
 
                                     var diseasedrugLink = {"source":results1.results.bindings[0].diseaseLabel.value,
                                         "target":results1.results.bindings[i].drugLabel.value, "value":1 }
@@ -587,7 +614,7 @@
                                         drugSet.add(results2.results.bindings[j].drugLabel.value)
                                     }else{
                                         for(var k =0; k < networkData["nodes"].length; k++){
-                                            if(networkData["nodes"][k].id == results2.results.bindings[j].drugLabel.value){
+                                            if(networkData["nodes"][k].id === results2.results.bindings[j].drugLabel.value){
                                                 networkData["nodes"][k].group = 5;
                                             }
                                         }
@@ -596,6 +623,7 @@
                                     var disease2drugLink = {"source":results2.results.bindings[0].diseaseLabel.value,
                                         "target":results2.results.bindings[j].drugLabel.value, "value":1 }
                                     networkData["links"].push(disease2drugLink)
+                                    console.log(networkData)
                                 }
 
 
