@@ -7,7 +7,6 @@ body{
     color:orange;
     padding-left:100px;
     font-weight: bold;
-    background: coral;
 }
 .grid-container{
     display: flex;
@@ -59,6 +58,16 @@ body{
 .Diseases{
     color:orange;
     font-size:16px;
+}
+
+.button{
+    background-color: white;
+    border-radius: 5px;
+}
+
+.inside-button{
+    font-size:20px;
+    color:steelblue;
 }
 
 #results{

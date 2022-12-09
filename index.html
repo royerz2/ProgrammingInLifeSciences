@@ -28,7 +28,6 @@
 
 
     <div class="main">
-
         <select class = "Diseases" id="ddDisease1">
             <option value="Q337998">Acariasis</option>
             <option value="Q422268">Actinomycosis</option>
@@ -501,13 +500,14 @@
             <option value="Q18553953">Western Equine Encephalitis</option>
             <option value="Q76973">Yaws</option>
         </select>
-        <button onclick="runQuery()";
-                style="background-color: white;">
-            <h1 style = font-size:20px;color:steelblue >Medication Query</h1>
+
+        <button  class = "button" onclick="runQuery()";>
+            <h1 class ="inside-button">Medication Query</h1>
         </button>
     </div>
     <div id="results">
-        <svg id="chart"></svg>
+<!--        //blank box in which chart will put new results for every new data-->
+         <svg id="chart"></svg>
     </div>
 </div>
 
@@ -549,7 +549,7 @@
         const endpointUrl = 'https://query.wikidata.org/sparql';
 
         //SPARQL Query for disease 1
-        const sparqlQuery1 = `SELECT DISTINCT ?drug ?drugLabel ?articleDrug ?disease ?diseaseLabel ?articleDisease
+        const sparqlQuery1 = `SELECT DISTINCT ?drug ?drugLabel  ?disease ?diseaseLabel
                                 WHERE
                                 {
                                     wd:${disease1} wdt:P2176 ?drug.
@@ -563,7 +563,7 @@
         queryDispatcher1.query(sparqlQuery1).then(
             function (results1){
                 //SPARQL Query for disease 2
-                const sparqlQuery2 = `SELECT DISTINCT ?drug ?drugLabel ?articleDrug ?disease ?diseaseLabel ?articleDisease
+                const sparqlQuery2 = `SELECT DISTINCT ?drug ?drugLabel ?disease ?diseaseLabel
                                     WHERE
                                     {
                                       wd:${disease2} wdt:P2176 ?drug.
@@ -576,79 +576,62 @@
                 const queryDispatcher2 = new SPARQLQueryDispatcher(endpointUrl);
                 queryDispatcher2.query(sparqlQuery2).then(
                     function (results2){
-                        //Find union of both
-                        const sparqlQuery3 = `SELECT DISTINCT ?drug ?drugLabel  ?disease ?diseaseLabel
-                                        WHERE
-                                        {
-                                            wd:${disease1} wdt:P2176 ?drug.
-                                            ?drug wdt:P2175 wd:${disease2}
-                                            SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" }
-                                            }`;
-                        const queryDispatcher3 = new SPARQLQueryDispatcher(endpointUrl);
-                        queryDispatcher3.query(sparqlQuery3).then(
-                            function (results3){
-                                var networkData = {}
-                                networkData["nodes"] = [];
-                                networkData["links"] = [];
-                                var drugSet = new Set();
-                                var disease1Node = {"id":results1.results.bindings[0].diseaseLabel.value, "group":1}
-                                var disease2Node = {"id":results2.results.bindings[0].diseaseLabel.value, "group":1}
-                                networkData["nodes"].push(disease1Node,disease2Node)
+                        var networkData = {}
+                        networkData["nodes"] = [];
+                        networkData["links"] = [];
+                        var drugSet = new Set();
+                        var disease1Node = {"id":results1.results.bindings[0].diseaseLabel.value, "group":1}
+                        var disease2Node = {"id":results2.results.bindings[0].diseaseLabel.value, "group":1}
+                        networkData["nodes"].push(disease1Node,disease2Node)
 
-                                for(var i =0; i < results1.results.bindings.length;i++){
-                                    if(!drugSet.has(results1.results.bindings[i].drugLabel.value)){
-                                        var drugNode = {"id":results1.results.bindings[i].drugLabel.value, "group":3}
-                                        networkData["nodes"].push(drugNode)
-                                        drugSet.add(results1.results.bindings[i].drugLabel.value)
-                                        }
+                        for(var i =0; i < results1.results.bindings.length;i++){
+                            if(!drugSet.has(results1.results.bindings[i].drugLabel.value)){
+                                var drugNode = {"id":results1.results.bindings[i].drugLabel.value, "group":3}
+                                networkData["nodes"].push(drugNode)
+                                drugSet.add(results1.results.bindings[i].drugLabel.value)
+                            }
 
-                                    var diseasedrugLink = {"source":results1.results.bindings[0].diseaseLabel.value,
-                                        "target":results1.results.bindings[i].drugLabel.value, "value":1 }
-                                    networkData["links"].push(diseasedrugLink)
-                                }
+                            var diseasedrugLink = {"source":results1.results.bindings[0].diseaseLabel.value,
+                                "target":results1.results.bindings[i].drugLabel.value, "value":1 }
+                            networkData["links"].push(diseasedrugLink)
+                        }
 
-                                for(var j =0; j < results2.results.bindings.length;j++){
-                                    if(!drugSet.has(results2.results.bindings[j].drugLabel.value)) {
-                                        var drug2Node = {"id": results2.results.bindings[j].drugLabel.value, "group": 4}
-                                        networkData["nodes"].push(drug2Node)
-                                        drugSet.add(results2.results.bindings[j].drugLabel.value)
-                                    }else{
-                                        for(var k =0; k < networkData["nodes"].length; k++){
-                                            if(networkData["nodes"][k].id === results2.results.bindings[j].drugLabel.value){
-                                                networkData["nodes"][k].group = 5;
-                                            }
-                                        }
+                        for(var j =0; j < results2.results.bindings.length;j++){
+                            if(!drugSet.has(results2.results.bindings[j].drugLabel.value)) {
+                                var drug2Node = {"id": results2.results.bindings[j].drugLabel.value, "group": 4}
+                                networkData["nodes"].push(drug2Node)
+                                drugSet.add(results2.results.bindings[j].drugLabel.value)
+                            }else{
+                                for(var k =0; k < networkData["nodes"].length; k++){
+                                    if(networkData["nodes"][k].id === results2.results.bindings[j].drugLabel.value){
+                                        networkData["nodes"][k].group = 5;
                                     }
-
-                                    var disease2drugLink = {"source":results2.results.bindings[0].diseaseLabel.value,
-                                        "target":results2.results.bindings[j].drugLabel.value, "value":1 }
-                                    networkData["links"].push(disease2drugLink)
-
                                 }
-                                console.log(results1)
-                                console.log(results2)
-                                console.log(results3)
-                                console.log(networkData)
+                            }
+
+                            var disease2drugLink = {"source":results2.results.bindings[0].diseaseLabel.value,
+                                "target":results2.results.bindings[j].drugLabel.value, "value":1 }
+                            networkData["links"].push(disease2drugLink)
+
+                        }
 
 
-                                const chart = ForceGraph(networkData, {
-                                    nodeId: d => d.id,
-                                    nodeGroup: d => d.group,
-                                    nodeTitle: d => `${d.id}\n${d.group}`,
-                                    linkStrokeWidth: l => Math.sqrt(l.value),
-                                    width: 600,
-                                    height: 600,
-                                    //invalidation // a promise to stop the simulation when the cell is re-run
-                                });
+                        const chart = ForceGraph(networkData, {
+                            nodeId: d => d.id,
+                            nodeGroup: d => d.group,
+                            nodeTitle: d => `${d.id}\n${d.group}`,
+                            linkStrokeWidth: l => Math.sqrt(l.value),
+                            width: 600,
+                            height: 600,
+                        });
 
-                                const div = document.getElementById('chart');
-                                div.remove();
-                                var elemDiv = document.createElement('div');
-                                elemDiv.id = "chart"
-                                document.body.appendChild(elemDiv);
-                                elemDiv.appendChild(chart);
+                        const div = document.getElementById('chart');
+                        div.remove();
+                        var elemDiv = document.createElement('div');
+                        elemDiv.id = "chart"
+                        document.body.appendChild(elemDiv);
+                        elemDiv.appendChild(chart);
 
-                            })
                     })
 
             })
@@ -656,52 +639,6 @@
 
 
     }
-
-
-
-    function getAll(){
-
-        class SPARQLQueryDispatcher {
-            constructor(endpoint) {
-                this.endpoint = endpoint;
-            }
-
-            query(sparqlQuery) {
-                const fullUrl = this.endpoint + '?query=' + encodeURIComponent(sparqlQuery);
-                const headers = {'Accept': 'application/sparql-results+json'};
-
-                return fetch(fullUrl, {headers}).then(body => body.json());
-            }
-        }
-
-        const endpointUrl = 'https://query.wikidata.org/sparql';
-
-        //SPARQL Query for disease 1
-        const sparqlQuery4 = `SELECT DISTINCT ?item ?itemLabel ?rgb ?link
-                                WHERE
-                                {
-                                  VALUES ?toggle { true false }
-                                  ?disease wdt:P699 ?doid;
-                                           wdt:P279+ wd:Q18123741;
-                                           wdt:P2176 ?drug.
-                                  ?drug rdfs:label ?drugLabel.
-                                    FILTER(LANG(?drugLabel) = "en").
-                                  ?disease rdfs:label ?diseaseLabel.
-                                    FILTER(LANG(?diseaseLabel) = "en").
-                                  BIND(IF(?toggle,?disease,?drug) AS ?item).
-                                  BIND(IF(?toggle,?diseaseLabel,?drugLabel) AS ?itemLabel).
-                                  BIND(IF(?toggle,"FFA500","7FFF00") AS ?rgb).
-                                  BIND(IF(?toggle,"",?disease) AS ?link).
-                                }`;
-
-        //Dispatch query for all
-        const queryDispatcher4 = new SPARQLQueryDispatcher(endpointUrl);
-        queryDispatcher4.query(sparqlQuery4).then(console.log);
-
-
-
-    }
-
 
 
 
