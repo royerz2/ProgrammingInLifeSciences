@@ -70,13 +70,9 @@ body{
     color:steelblue;
 }
 
-#results{
-    display: flex;
-    grid-template-columns: min-content;
-    justify-content: center;
-}
 #chart{
-    padding-left: 500px;
+    display: flex;
+    justify-content: center;
 }
 
 
