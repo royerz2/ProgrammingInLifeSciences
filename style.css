@@ -75,5 +75,8 @@ body{
     grid-template-columns: min-content;
     justify-content: center;
 }
+#chart{
+    padding-left: 500px;
+}
 
 
