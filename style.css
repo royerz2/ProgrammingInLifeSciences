@@ -52,22 +52,33 @@ body{
 
 .main{
     padding-top: 100px;
-    padding-inline: 200px;
+    display: flex;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1fr;
+    justify-content: center;
 }
 
 .Diseases{
     color:orange;
+    font-family:monospace,serif;
     font-size:16px;
+    height: 40px;
+    font-weight: bold;
+    width: available;
 }
 
 .button{
     background-color: white;
     border-radius: 5px;
+    height: 40px;
 }
 
 .inside-button{
-    font-size:20px;
+    font-size:16px;
     color:steelblue;
+    margin: 0;
+    font-family:monospace,serif;
+    font-weight: bold;
 }
 
 #chart{
